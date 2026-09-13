@@ -1,0 +1,2517 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>RoleChat</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+    --bg: #f4f4f7;
+    --panel: #ffffff;
+    --text: #17171b;
+    --muted: #777780;
+    --border: #e5e5ea;
+    --accent: #007aff;
+    --incoming: #e9e9eb;
+    --outgoing: #007aff;
+    --danger: #ff3b30;
+}
+
+body.dark {
+    --bg: #000000;
+    --panel: #171719;
+    --text: #ffffff;
+    --muted: #9b9ba3;
+    --border: #303034;
+    --incoming: #29292d;
+    --outgoing: #0a84ff;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                 "SF Pro Text", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+}
+
+button,
+input,
+textarea {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* APP */
+
+#app {
+    width: 100%;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+}
+
+/* SCREENS */
+
+.screen {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+
+.screen.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* HOME */
+
+.home-header {
+    padding: 55px 20px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.home-title {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+}
+
+.icon-btn {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: var(--panel);
+    color: var(--text);
+    font-size: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+}
+
+.home-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px 100px;
+}
+
+.section-title {
+    margin: 15px 5px 12px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.characters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.character-card {
+    background: var(--panel);
+    border-radius: 18px;
+    padding: 13px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    border: 1px solid var(--border);
+    transition: transform .15s;
+}
+
+.character-card:active {
+    transform: scale(.98);
+}
+
+.avatar {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #d8d8dc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 25px;
+    overflow: hidden;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.character-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.character-name {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.character-preview {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.online-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #34c759;
+    margin-right: 5px;
+    display: inline-block;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--muted);
+    padding: 70px 25px;
+}
+
+.empty-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+/* CREATE */
+
+.create-header,
+.chat-header {
+    height: 88px;
+    padding: 42px 15px 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    flex-shrink: 0;
+}
+
+.back-btn {
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    font-size: 28px;
+    width: 38px;
+}
+
+.header-title {
+    font-size: 17px;
+    font-weight: 700;
+    flex: 1;
+}
+
+.create-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 17px 40px;
+}
+
+.form-section {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0 5px 8px;
+}
+
+.input,
+.textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 13px 14px;
+    font-size: 16px;
+    outline: none;
+}
+
+.input:focus,
+.textarea:focus {
+    border-color: var(--accent);
+}
+
+.textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.avatar-picker {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0 25px;
+}
+
+.big-avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: var(--border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    position: relative;
+}
+
+.big-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-edit {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 3px solid var(--panel);
+    background: var(--accent);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.primary-btn {
+    width: 100%;
+    border: none;
+    border-radius: 15px;
+    padding: 15px;
+    background: var(--accent);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.secondary-btn {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 14px;
+    background: var(--panel);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.danger-btn {
+    width: 100%;
+    border: none;
+    border-radius: 15px;
+    padding: 14px;
+    background: rgba(255,59,48,.12);
+    color: var(--danger);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* CHAT */
+
+.chat-header {
+    justify-content: center;
+    position: relative;
+}
+
+.chat-back {
+    position: absolute;
+    left: 10px;
+}
+
+.chat-person {
+    text-align: center;
+}
+
+.chat-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    vertical-align: middle;
+    margin-right: 7px;
+    background: #ccc;
+}
+
+.chat-name {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.chat-status {
+    display: block;
+    font-size: 11px;
+    color: #34c759;
+    margin-top: 1px;
+}
+
+.chat-menu {
+    position: absolute;
+    right: 10px;
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    font-size: 22px;
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--bg);
+}
+
+.date-divider {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    margin: 8px 0;
+}
+
+.message-row {
+    display: flex;
+    width: 100%;
+}
+
+.message-row.me {
+    justify-content: flex-end;
+}
+
+.message-row.character {
+    justify-content: flex-start;
+}
+
+.message {
+    max-width: 78%;
+    padding: 9px 13px 7px;
+    border-radius: 18px;
+    font-size: 16px;
+    line-height: 1.32;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    position: relative;
+}
+
+.message-row.me .message {
+    background: var(--outgoing);
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+.message-row.character .message {
+    background: var(--incoming);
+    color: var(--text);
+    border-bottom-left-radius: 5px;
+}
+
+.time {
+    font-size: 9px;
+    opacity: .55;
+    margin-left: 6px;
+    float: right;
+    margin-top: 5px;
+}
+
+.typing {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    background: var(--incoming);
+    border-radius: 18px;
+    border-bottom-left-radius: 5px;
+    padding: 10px 14px;
+    width: fit-content;
+    margin-bottom: 5px;
+}
+
+.typing.show {
+    display: flex;
+}
+
+.typing span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+    animation: bounce 1s infinite;
+}
+
+.typing span:nth-child(2) {
+    animation-delay: .15s;
+}
+
+.typing span:nth-child(3) {
+    animation-delay: .3s;
+}
+
+@keyframes bounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-4px);
+    }
+}
+
+/* INPUT */
+
+.chat-input-area {
+    padding: 8px 9px calc(8px + env(safe-area-inset-bottom));
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    gap: 7px;
+}
+
+.attach-btn {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--accent);
+    font-size: 25px;
+}
+
+.chat-input {
+    flex: 1;
+    min-height: 38px;
+    max-height: 110px;
+    border: 1px solid var(--border);
+    border-radius: 19px;
+    background: var(--bg);
+    color: var(--text);
+    padding: 9px 14px;
+    font-size: 16px;
+    outline: none;
+    resize: none;
+}
+
+.send-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-size: 18px;
+}
+
+/* MODAL */
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 100;
+    align-items: flex-end;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal {
+    width: 100%;
+    max-height: 85dvh;
+    overflow-y: auto;
+    background: var(--panel);
+    border-radius: 24px 24px 0 0;
+    padding: 20px;
+    animation: slideUp .25s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.modal-handle {
+    width: 40px;
+    height: 5px;
+    border-radius: 5px;
+    background: var(--border);
+    margin: 0 auto 20px;
+}
+
+.modal h2 {
+    margin: 0 0 20px;
+    font-size: 23px;
+}
+
+/* TOAST */
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(30,30,30,.92);
+    color: white;
+    padding: 11px 17px;
+    border-radius: 20px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: .25s;
+    z-index: 300;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* RESPONSIVE */
+
+@media (min-width: 700px) {
+    #app {
+        max-width: 500px;
+        margin: auto;
+        box-shadow: 0 0 40px rgba(0,0,0,.12);
+    }
+
+    body {
+        background: #d8d8dc;
+    }
+
+    body.dark {
+        background: #050505;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+    <!-- HOME -->
+    <section id="homeScreen" class="screen active">
+
+        <div class="home-header">
+            <div class="home-title">Chats</div>
+
+            <button class="icon-btn" onclick="openCreate()">
+                ＋
+            </button>
+        </div>
+
+        <div class="home-content">
+
+            <div class="section-title">I tuoi personaggi</div>
+
+            <div id="charactersList" class="characters"></div>
+
+        </div>
+    </section>
+
+
+    <!-- CREATE -->
+    <section id="createScreen" class="screen">
+
+        <div class="create-header">
+
+            <button class="back-btn" onclick="showScreen('homeScreen')">
+                ‹
+            </button>
+
+            <div class="header-title">
+                Nuovo personaggio
+            </div>
+
+        </div>
+
+        <div class="create-content">
+
+            <div class="avatar-picker">
+
+                <div class="big-avatar" id="avatarPreview">
+                    👤
+
+                    <label class="avatar-edit">
+                        +
+                        <input
+                            type="file"
+                            id="avatarInput"
+                            accept="image/*"
+                            hidden
+                        >
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-section">
+
+                <div class="form-label">
+                    Nome
+                </div>
+
+                <input
+                    id="characterName"
+                    class="input"
+                    placeholder="Es. Alex"
+                >
+
+            </div>
+
+
+            <div class="form-section">
+
+                <div class="form-label">
+                    Username
+                </div>
+
+                <input
+                    id="characterUsername"
+                    class="input"
+                    placeholder="@alex"
+                >
+
+            </div>
+
+
+            <div class="form-section">
+
+                <div class="form-label">
+                    Personalità
+                </div>
+
+                <textarea
+                    id="characterPersonality"
+                    class="textarea"
+                    placeholder="Es. È sarcastico, protettivo, intelligente, molto sicuro di sé..."
+                ></textarea>
+
+            </div>
+
+
+            <div class="form-section">
+
+                <div class="form-label">
+                    Scenario / storia
+                </div>
+
+                <textarea
+                    id="characterScenario"
+                    class="textarea"
+                    placeholder="Descrivi il mondo, la situazione, il rapporto tra voi, cosa è successo prima..."
+                ></textarea>
+
+            </div>
+
+
+            <div class="form-section">
+
+                <div class="form-label">
+                    Messaggio iniziale
+                </div>
+
+                <textarea
+                    id="characterGreeting"
+                    class="textarea"
+                    placeholder="La prima cosa che il personaggio ti dice..."
+                ></textarea>
+
+            </div>
+
+
+            <div class="form-section">
+
+                <div class="form-label">
+                    Stato iniziale
+                </div>
+
+                <input
+                    id="characterMood"
+                    class="input"
+                    placeholder="Es. curioso, nervoso, arrabbiato, felice..."
+                >
+
+            </div>
+
+
+            <button class="primary-btn" onclick="createCharacter()">
+                Crea personaggio
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- CHAT -->
+    <section id="chatScreen" class="screen">
+
+        <div class="chat-header">
+
+            <button
+                class="back-btn chat-back"
+                onclick="closeChat()"
+            >
+                ‹
+            </button>
+
+            <div class="chat-person">
+
+                <img
+                    id="chatAvatar"
+                    class="chat-avatar"
+                    src=""
+                    alt=""
+                >
+
+                <span id="chatName" class="chat-name"></span>
+
+                <span class="chat-status">
+                    ● online
+                </span>
+
+            </div>
+
+            <button
+                class="chat-menu"
+                onclick="openChatMenu()"
+            >
+                ⋯
+            </button>
+
+        </div>
+
+
+        <div id="messages" class="messages"></div>
+
+
+        <div class="chat-input-area">
+
+            <button
+                class="attach-btn"
+                onclick="showToast('Funzione disponibile nella prossima versione')"
+            >
+                ＋
+            </button>
+
+            <textarea
+                id="chatInput"
+                class="chat-input"
+                rows="1"
+                placeholder="Messaggio..."
+                onkeydown="handleInputKey(event)"
+            ></textarea>
+
+            <button
+                class="send-btn"
+                onclick="sendMessage()"
+            >
+                ↑
+            </button>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- MENU MODAL -->
+
+<div id="menuModal" class="modal-overlay" onclick="closeModalOutside(event)">
+
+    <div class="modal">
+
+        <div class="modal-handle"></div>
+
+        <h2>Impostazioni chat</h2>
+
+        <button
+            class="secondary-btn"
+            onclick="restartChat()"
+        >
+            ↻ Ricomincia conversazione
+        </button>
+
+        <br>
+
+        <button
+            class="secondary-btn"
+            onclick="editCurrentCharacter()"
+        >
+            ✎ Modifica personaggio
+        </button>
+
+        <br>
+
+        <button
+            class="secondary-btn"
+            onclick="toggleDarkMode()"
+        >
+            ◐ Modalità scura
+        </button>
+
+        <br>
+
+        <button
+            class="danger-btn"
+            onclick="deleteCurrentCharacter()"
+        >
+            Elimina personaggio
+        </button>
+
+        <br>
+
+        <button
+            class="secondary-btn"
+            onclick="closeModal()"
+        >
+            Chiudi
+        </button>
+
+    </div>
+
+</div>
+
+
+<div id="toast" class="toast"></div>
+
+
+<script>
+
+/* =========================================================
+   ROLECHAT
+   No server.
+   No API.
+   No external libraries.
+   Everything is stored locally.
+   ========================================================= */
+
+
+/* -----------------------------
+   GLOBAL STATE
+----------------------------- */
+
+let characters = [];
+let currentCharacter = null;
+let editingCharacterId = null;
+let avatarData = null;
+
+
+/* -----------------------------
+   STORAGE
+----------------------------- */
+
+function loadCharacters() {
+
+    try {
+
+        const saved = localStorage.getItem("rolechat_characters");
+
+        characters = saved
+            ? JSON.parse(saved)
+            : [];
+
+    } catch (error) {
+
+        characters = [];
+
+    }
+
+}
+
+
+function saveCharacters() {
+
+    localStorage.setItem(
+        "rolechat_characters",
+        JSON.stringify(characters)
+    );
+
+}
+
+
+/* -----------------------------
+   SCREEN MANAGEMENT
+----------------------------- */
+
+function showScreen(id) {
+
+    document
+        .querySelectorAll(".screen")
+        .forEach(screen => {
+            screen.classList.remove("active");
+        });
+
+    document
+        .getElementById(id)
+        .classList.add("active");
+
+}
+
+
+/* -----------------------------
+   HOME
+----------------------------- */
+
+function renderCharacters() {
+
+    const container =
+        document.getElementById("charactersList");
+
+    container.innerHTML = "";
+
+    if (characters.length === 0) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">💬</div>
+
+                <div>
+                    Non hai ancora creato nessun personaggio.
+                </div>
+
+                <br>
+
+                <button
+                    class="primary-btn"
+                    onclick="openCreate()"
+                >
+                    Crea il primo personaggio
+                </button>
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    characters.forEach(character => {
+
+        const card =
+            document.createElement("div");
+
+        card.className = "character-card";
+
+        const avatar =
+            character.avatar
+            ? `<img src="${character.avatar}">`
+            : "👤";
+
+        const lastMessage =
+            character.messages &&
+            character.messages.length
+            ? character.messages[
+                character.messages.length - 1
+              ].text
+            : character.greeting;
+
+        card.innerHTML = `
+
+            <div class="avatar">
+                ${avatar}
+            </div>
+
+            <div class="character-info">
+
+                <div class="character-name">
+                    ${escapeHTML(character.name)}
+                </div>
+
+                <div class="character-preview">
+                    <span class="online-dot"></span>
+                    ${escapeHTML(lastMessage || "Nuova chat")}
+                </div>
+
+            </div>
+
+        `;
+
+        card.onclick = () =>
+            openChat(character.id);
+
+        container.appendChild(card);
+
+    });
+
+}
+
+
+/* -----------------------------
+   CREATE CHARACTER
+----------------------------- */
+
+function openCreate() {
+
+    editingCharacterId = null;
+    avatarData = null;
+
+    document.getElementById("characterName").value = "";
+    document.getElementById("characterUsername").value = "";
+    document.getElementById("characterPersonality").value = "";
+    document.getElementById("characterScenario").value = "";
+    document.getElementById("characterGreeting").value = "";
+    document.getElementById("characterMood").value = "";
+
+    document.getElementById("avatarPreview").innerHTML = `
+        👤
+        <label class="avatar-edit">
+            +
+            <input
+                type="file"
+                id="avatarInput"
+                accept="image/*"
+                hidden
+            >
+        </label>
+    `;
+
+    attachAvatarListener();
+
+    showScreen("createScreen");
+
+}
+
+
+function attachAvatarListener() {
+
+    const input =
+        document.getElementById("avatarInput");
+
+    if (!input) return;
+
+    input.addEventListener("change", function() {
+
+        const file = this.files[0];
+
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+
+            avatarData = e.target.result;
+
+            document.getElementById(
+                "avatarPreview"
+            ).innerHTML = `
+
+                <img src="${avatarData}">
+
+                <label class="avatar-edit">
+                    +
+                    <input
+                        type="file"
+                        id="avatarInput"
+                        accept="image/*"
+                        hidden
+                    >
+                </label>
+            `;
+
+            attachAvatarListener();
+
+        };
+
+        reader.readAsDataURL(file);
+
+    });
+
+}
+
+
+function createCharacter() {
+
+    const name =
+        document.getElementById("characterName")
+        .value.trim();
+
+    const username =
+        document.getElementById("characterUsername")
+        .value.trim();
+
+    const personality =
+        document.getElementById("characterPersonality")
+        .value.trim();
+
+    const scenario =
+        document.getElementById("characterScenario")
+        .value.trim();
+
+    const greeting =
+        document.getElementById("characterGreeting")
+        .value.trim();
+
+    const mood =
+        document.getElementById("characterMood")
+        .value.trim() || "neutro";
+
+
+    if (!name) {
+
+        showToast("Inserisci il nome del personaggio");
+
+        return;
+
+    }
+
+
+    if (!greeting) {
+
+        showToast("Inserisci il messaggio iniziale");
+
+        return;
+
+    }
+
+
+    const character = {
+
+        id: editingCharacterId || Date.now(),
+
+        name,
+        username,
+        personality,
+        scenario,
+        greeting,
+        mood,
+
+        avatar: avatarData,
+
+        relationship: 50,
+
+        trust: 50,
+
+        messages: []
+
+    };
+
+
+    if (editingCharacterId) {
+
+        const index =
+            characters.findIndex(
+                c => c.id === editingCharacterId
+            );
+
+        if (index !== -1) {
+
+            character.messages =
+                characters[index].messages || [];
+
+            character.relationship =
+                characters[index].relationship ?? 50;
+
+            character.trust =
+                characters[index].trust ?? 50;
+
+            characters[index] = character;
+
+        }
+
+    } else {
+
+        characters.unshift(character);
+
+    }
+
+
+    saveCharacters();
+
+    renderCharacters();
+
+    showScreen("homeScreen");
+
+    showToast("Personaggio creato");
+
+}
+
+
+/* -----------------------------
+   OPEN CHAT
+----------------------------- */
+
+function openChat(id) {
+
+    currentCharacter =
+        characters.find(c => c.id === id);
+
+    if (!currentCharacter) return;
+
+
+    document.getElementById("chatName")
+        .textContent =
+        currentCharacter.name;
+
+
+    document.getElementById("chatAvatar")
+        .src =
+        currentCharacter.avatar ||
+        createAvatarPlaceholder(currentCharacter.name);
+
+
+    renderMessages();
+
+    showScreen("chatScreen");
+
+}
+
+
+function closeChat() {
+
+    saveCharacters();
+
+    currentCharacter = null;
+
+    renderCharacters();
+
+    showScreen("homeScreen");
+
+}
+
+
+/* -----------------------------
+   RENDER MESSAGES
+----------------------------- */
+
+function renderMessages() {
+
+    const container =
+        document.getElementById("messages");
+
+    container.innerHTML = "";
+
+
+    if (!currentCharacter) return;
+
+
+    if (
+        !currentCharacter.messages ||
+        currentCharacter.messages.length === 0
+    ) {
+
+        addMessageToDOM(
+            "character",
+            currentCharacter.greeting
+        );
+
+        return;
+
+    }
+
+
+    currentCharacter.messages.forEach(message => {
+
+        addMessageToDOM(
+            message.sender,
+            message.text,
+            message.time
+        );
+
+    });
+
+
+    scrollMessages();
+
+}
+
+
+function addMessageToDOM(
+    sender,
+    text,
+    time = null
+) {
+
+    const container =
+        document.getElementById("messages");
+
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "message-row " +
+        (sender === "me"
+            ? "me"
+            : "character");
+
+
+    const bubble =
+        document.createElement("div");
+
+    bubble.className = "message";
+
+
+    const messageText =
+        document.createElement("span");
+
+    messageText.textContent = text;
+
+
+    const timeElement =
+        document.createElement("span");
+
+    timeElement.className = "time";
+
+    timeElement.textContent =
+        time || currentTime();
+
+
+    bubble.appendChild(messageText);
+    bubble.appendChild(timeElement);
+
+    row.appendChild(bubble);
+
+    container.appendChild(row);
+
+}
+
+
+/* -----------------------------
+   SEND MESSAGE
+----------------------------- */
+
+function sendMessage() {
+
+    if (!currentCharacter) return;
+
+
+    const input =
+        document.getElementById("chatInput");
+
+    const text =
+        input.value.trim();
+
+
+    if (!text) return;
+
+
+    const message = {
+
+        sender: "me",
+
+        text,
+
+        time: currentTime()
+
+    };
+
+
+    currentCharacter.messages.push(message);
+
+
+    addMessageToDOM(
+        "me",
+        text,
+        message.time
+    );
+
+
+    input.value = "";
+
+    input.style.height = "38px";
+
+
+    updateCharacterState(text);
+
+
+    saveCharacters();
+
+    scrollMessages();
+
+
+    showTyping();
+
+
+    const delay =
+        Math.min(
+            2400,
+            Math.max(
+                650,
+                600 + text.length * 18
+            )
+        );
+
+
+    setTimeout(() => {
+
+        hideTyping();
+
+        const response =
+            generateCharacterResponse(text);
+
+
+        const responseMessage = {
+
+            sender: "character",
+
+            text: response,
+
+            time: currentTime()
+
+        };
+
+
+        currentCharacter.messages.push(
+            responseMessage
+        );
+
+
+        addMessageToDOM(
+            "character",
+            response,
+            responseMessage.time
+        );
+
+
+        saveCharacters();
+
+        scrollMessages();
+
+    }, delay);
+
+}
+
+
+/* -----------------------------
+   INPUT
+----------------------------- */
+
+function handleInputKey(event) {
+
+    if (
+        event.key === "Enter" &&
+        !event.shiftKey
+    ) {
+
+        event.preventDefault();
+
+        sendMessage();
+
+    }
+
+}
+
+
+document.addEventListener(
+    "input",
+    function(event) {
+
+        if (
+            event.target &&
+            event.target.id === "chatInput"
+        ) {
+
+            event.target.style.height = "38px";
+
+            event.target.style.height =
+                Math.min(
+                    event.target.scrollHeight,
+                    110
+                ) + "px";
+
+        }
+
+    }
+);
+
+
+/* -----------------------------
+   FAKE AI / ROLEPLAY ENGINE
+----------------------------- */
+
+function generateCharacterResponse(userText) {
+
+    const character =
+        currentCharacter;
+
+
+    const text =
+        userText.toLowerCase();
+
+
+    const personality =
+        character.personality.toLowerCase();
+
+
+    const scenario =
+        character.scenario.toLowerCase();
+
+
+    const mood =
+        character.mood.toLowerCase();
+
+
+    /*
+       Important keywords.
+    */
+
+    const isQuestion =
+        text.includes("?");
+
+
+    const isGreeting =
+        /^(ciao|hey|ehi|salve|buongiorno|buonasera|hello)/i
+        .test(text);
+
+
+    const isLove =
+        /(amore|ti amo|innamor|bacio|baciami|mi piaci|adoro)/i
+        .test(text);
+
+
+    const isAngry =
+        /(odio|stupido|idiota|arrabbi|furiosa|furioso|lasciami)/i
+        .test(text);
+
+
+    const isSad =
+        /(triste|piango|piangere|male|sola|solo|depress|paura)/i
+        .test(text);
+
+
+    const isThreat =
+        /(uccid|morire|morte|minaccia)/i
+        .test(text);
+
+
+    /*
+       Relationship system.
+    */
+
+    if (isLove) {
+
+        character.relationship =
+            Math.min(
+                100,
+                character.relationship + 5
+            );
+
+        character.trust =
+            Math.min(
+                100,
+                character.trust + 2
+            );
+
+    }
+
+
+    if (isAngry) {
+
+        character.relationship =
+            Math.max(
+                0,
+                character.relationship - 4
+            );
+
+    }
+
+
+    if (isSad) {
+
+        character.trust =
+            Math.min(
+                100,
+                character.trust + 2
+            );
+
+    }
+
+
+    const relationship =
+        character.relationship;
+
+
+    /*
+       USER DEFINED RESPONSE RULES
+
+       You can put special rules inside
+       the personality field using:
+
+       [IF: parola]
+       risposta
+
+       Example:
+
+       [IF: geloso]
+       "Non sono geloso."
+
+       The engine detects the keyword.
+    */
+
+    const custom =
+        findCustomResponse(
+            character.personality,
+            text
+        );
+
+
+    if (custom) {
+
+        return custom;
+
+    }
+
+
+    /*
+       Greeting
+    */
+
+    if (isGreeting) {
+
+        if (
+            personality.includes("fredd") ||
+            personality.includes("distacc")
+        ) {
+
+            return random([
+                "Ti guarda per qualche secondo. «Ciao.»",
+                "«Sei arrivata.»",
+                "«Ehi.» Dice la parola quasi sottovoce."
+            ]);
+
+        }
+
+
+        return random([
+            "«Ehi.» Ti sorride appena.",
+            "«Ciao. Finalmente.»",
+            "«Eccoti.»",
+            "«Hey. Come stai?»"
+        ]);
+
+    }
+
+
+    /*
+       Love
+    */
+
+    if (isLove) {
+
+        if (
+            relationship >= 80
+        ) {
+
+            return random([
+                "Ti guarda negli occhi per un momento. «Lo sai che con te non riesco proprio a fingere, vero?»",
+                "Sorride lentamente. «Vieni qui.»",
+                "«Non hai idea di quanto avessi bisogno di sentirlo.»",
+                "Si avvicina a te. «Dillo ancora.»"
+            ]);
+
+        }
+
+
+        if (
+            relationship >= 55
+        ) {
+
+            return random([
+                "Rimane in silenzio per qualche secondo, poi sorride.",
+                "«Non rendermela difficile...»",
+                "Ti guarda, visibilmente imbarazzato. «Davvero?»",
+                "«Forse... mi piaci più di quanto dovrei.»"
+            ]);
+
+        }
+
+
+        return random([
+            "Ti guarda con aria sorpresa.",
+            "«Non mi aspettavo proprio che dicessi una cosa del genere.»",
+            "Rimane in silenzio, cercando una risposta.",
+            "«Sei seria?»"
+        ]);
+
+    }
+
+
+    /*
+       Sad
+    */
+
+    if (isSad) {
+
+        return random([
+            "Il suo tono cambia immediatamente. «Ehi... guardami.»",
+            "«Non devi affrontarlo da sola.»",
+            "Si avvicina lentamente. «Sono qui.»",
+            "«Puoi dirmi cosa è successo.»"
+        ]);
+
+    }
+
+
+    /*
+       Anger
+    */
+
+    if (isAngry) {
+
+        return random([
+            "Il suo sguardo si fa serio. «Non parlarmi così.»",
+            "Rimane in silenzio per qualche secondo.",
+            "«Va bene. Se vuoi litigare, litighiamo.»",
+            "Fa un passo indietro. «Adesso calmati.»"
+        ]);
+
+    }
+
+
+    /*
+       Question
+    */
+
+    if (isQuestion) {
+
+        if (
+            relationship >= 75
+        ) {
+
+            return random([
+                "«Secondo te?» Ti sorride appena.",
+                "«Sai già la risposta.»",
+                "«Vuoi davvero che te lo dica?»",
+                "«Probabilmente sì.»"
+            ]);
+
+        }
+
+
+        return random([
+            "«Non lo so ancora.»",
+            "Ci pensa per qualche secondo. «Dipende.»",
+            "«Perché me lo chiedi?»",
+            "«Potrei dirtelo, ma voglio prima capire cosa pensi tu.»"
+        ]);
+
+    }
+
+
+    /*
+       Personality recognition
+    */
+
+    if (
+        personality.includes("sarcast") ||
+        personality.includes("iron")
+    ) {
+
+        return random([
+            "«Ah, certo. Perché questa era chiaramente la soluzione migliore.»",
+            "Ti guarda con un mezzo sorriso. «Interessante scelta.»",
+            "«Tu sei davvero incredibile, sai?»",
+            "Scuote la testa, divertito. «Non cambierai mai.»"
+        ]);
+
+    }
+
+
+    if (
+        personality.includes("fredd") ||
+        personality.includes("distacc")
+    ) {
+
+        return random([
+            "Ti osserva senza dire nulla.",
+            "«Capisco.»",
+            "Annuisce lentamente.",
+            "«Continua.»"
+        ]);
+
+    }
+
+
+    if (
+        personality.includes("dolce") ||
+        personality.includes("gentil")
+    ) {
+
+        return random([
+            "Ti sorride dolcemente.",
+            "«Va tutto bene. Sono qui.»",
+            "«Capisco cosa intendi.»",
+            "Ti ascolta con attenzione."
+        ]);
+
+    }
+
+
+    if (
+        personality.includes("gelos")
+    ) {
+
+        return random([
+            "«E con chi eri?»",
+            "Ti guarda con un'espressione sospettosa.",
+            "«Non mi piace molto questa storia.»",
+            "«Dovrei essere geloso?»"
+        ]);
+
+    }
+
+
+    /*
+       Mood
+    */
+
+    if (
+        mood.includes("arrabbi") ||
+        mood.includes("furios")
+    ) {
+
+        return random([
+            "«Non è proprio il momento migliore per parlarne.»",
+            "Sospira. «Sono ancora arrabbiato.»",
+            "«Non farmi perdere la pazienza.»"
+        ]);
+
+    }
+
+
+    if (
+        mood.includes("felic") ||
+        mood.includes("gioi")
+    ) {
+
+        return random([
+            "Sorride. «Mi fa piacere sentirlo.»",
+            "«Finalmente una buona notizia.»",
+            "«Questa sì che è una cosa che volevo sentire.»"
+        ]);
+
+    }
+
+
+    /*
+       Scenario recognition
+    */
+
+    if (
+        scenario.includes("universit") ||
+        scenario.includes("scuola")
+    ) {
+
+        return random([
+            "«Ci vediamo dopo le lezioni?»",
+            "«Hai studiato o hai intenzione di improvvisare anche questa volta?»",
+            "«Aspetta, devo raccontarti una cosa successa oggi.»"
+        ]);
+
+    }
+
+
+    if (
+        scenario.includes("lavor")
+    ) {
+
+        return random([
+            "«È stata una giornata assurda.»",
+            "«Non voglio parlare di lavoro per almeno cinque minuti.»",
+            "«Dimmi che hai una buona notizia.»"
+        ]);
+
+    }
+
+
+    /*
+       Generic contextual responses.
+
+       These deliberately use parts of the
+       user's message so that the conversation
+       feels less static.
+    */
+
+    const clean =
+        userText
+        .replace(/[.!?]+/g, "")
+        .trim();
+
+
+    const short =
+        clean.length > 80
+            ? clean.substring(0, 80) + "..."
+            : clean;
+
+
+    return random([
+
+        `«${short}» ...Interessante. Dimmi di più.`,
+
+        `Ti ascolta attentamente. «Capisco cosa intendi.»`,
+
+        `Rimane in silenzio per qualche secondo. «Non avevo considerato la cosa da questo punto di vista.»`,
+
+        `«E quindi?» Ti guarda, aspettando che continui.`,
+
+        `Sorride appena. «Sapevo che prima o poi sarebbe venuto fuori questo argomento.»`,
+
+        `«Okay... continua.»`,
+
+        `Ti osserva attentamente, cercando di capire cosa stai pensando.`
+
+    ]);
+
+}
+
+
+/* -----------------------------
+   CUSTOM RESPONSE ENGINE
+----------------------------- */
+
+function findCustomResponse(
+    personality,
+    text
+) {
+
+    const regex =
+        /\[IF:\s*([^\]]+)\]\s*([\s\S]*?)(?=\[IF:|$)/gi;
+
+
+    let match;
+
+
+    while (
+        (match = regex.exec(personality)) !== null
+    ) {
+
+        const keyword =
+            match[1].trim().toLowerCase();
+
+        const response =
+            match[2].trim();
+
+
+        if (
+            keyword &&
+            text.includes(keyword) &&
+            response
+        ) {
+
+            return response
+                .replace(/^["']|["']$/g, "");
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* -----------------------------
+   CHARACTER STATE
+----------------------------- */
+
+function updateCharacterState(text) {
+
+    if (!currentCharacter) return;
+
+
+    const t =
+        text.toLowerCase();
+
+
+    if (
+        /(grazie|fidati|ti credo|mi fido)/.test(t)
+    ) {
+
+        currentCharacter.trust =
+            Math.min(
+                100,
+                currentCharacter.trust + 3
+            );
+
+    }
+
+
+    if (
+        /(bugiardo|bugiarda|non mi fido|menti)/.test(t)
+    ) {
+
+        currentCharacter.trust =
+            Math.max(
+                0,
+                currentCharacter.trust - 5
+            );
+
+    }
+
+
+    if (
+        /(scusa|mi dispiace|perdonami)/.test(t)
+    ) {
+
+        currentCharacter.relationship =
+            Math.min(
+                100,
+                currentCharacter.relationship + 2
+            );
+
+    }
+
+}
+
+
+/* -----------------------------
+   TYPING
+----------------------------- */
+
+function showTyping() {
+
+    const container =
+        document.getElementById("messages");
+
+
+    const typing =
+        document.createElement("div");
+
+    typing.id = "typingIndicator";
+
+    typing.className =
+        "message-row character";
+
+
+    typing.innerHTML = `
+
+        <div class="typing show">
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </div>
+
+    `;
+
+
+    container.appendChild(typing);
+
+    scrollMessages();
+
+}
+
+
+function hideTyping() {
+
+    const typing =
+        document.getElementById(
+            "typingIndicator"
+        );
+
+
+    if (typing) {
+
+        typing.remove();
+
+    }
+
+}
+
+
+/* -----------------------------
+   CHAT MENU
+----------------------------- */
+
+function openChatMenu() {
+
+    document
+        .getElementById("menuModal")
+        .classList.add("show");
+
+}
+
+
+function closeModal() {
+
+    document
+        .getElementById("menuModal")
+        .classList.remove("show");
+
+}
+
+
+function closeModalOutside(event) {
+
+    if (
+        event.target.id === "menuModal"
+    ) {
+
+        closeModal();
+
+    }
+
+}
+
+
+/* -----------------------------
+   RESTART
+----------------------------- */
+
+function restartChat() {
+
+    if (!currentCharacter) return;
+
+
+    const confirmed =
+        confirm(
+            "Ricominciare questa conversazione?"
+        );
+
+
+    if (!confirmed) return;
+
+
+    currentCharacter.messages = [];
+
+    currentCharacter.relationship = 50;
+
+    currentCharacter.trust = 50;
+
+    saveCharacters();
+
+    closeModal();
+
+    renderMessages();
+
+}
+
+
+/* -----------------------------
+   EDIT
+----------------------------- */
+
+function editCurrentCharacter() {
+
+    if (!currentCharacter) return;
+
+
+    const c =
+        currentCharacter;
+
+
+    editingCharacterId = c.id;
+
+    avatarData = c.avatar || null;
+
+
+    document.getElementById(
+        "characterName"
+    ).value = c.name || "";
+
+
+    document.getElementById(
+        "characterUsername"
+    ).value = c.username || "";
+
+
+    document.getElementById(
+        "characterPersonality"
+    ).value = c.personality || "";
+
+
+    document.getElementById(
+        "characterScenario"
+    ).value = c.scenario || "";
+
+
+    document.getElementById(
+        "characterGreeting"
+    ).value = c.greeting || "";
+
+
+    document.getElementById(
+        "characterMood"
+    ).value = c.mood || "";
+
+
+    if (c.avatar) {
+
+        document.getElementById(
+            "avatarPreview"
+        ).innerHTML = `
+
+            <img src="${c.avatar}">
+
+            <label class="avatar-edit">
+                +
+                <input
+                    type="file"
+                    id="avatarInput"
+                    accept="image/*"
+                    hidden
+                >
+            </label>
+
+        `;
+
+    }
+
+
+    attachAvatarListener();
+
+    closeModal();
+
+    showScreen("createScreen");
+
+}
+
+
+/* -----------------------------
+   DELETE
+----------------------------- */
+
+function deleteCurrentCharacter() {
+
+    if (!currentCharacter) return;
+
+
+    const confirmed =
+        confirm(
+            `Eliminare ${currentCharacter.name}?`
+        );
+
+
+    if (!confirmed) return;
+
+
+    characters =
+        characters.filter(
+            c => c.id !== currentCharacter.id
+        );
+
+
+    saveCharacters();
+
+    currentCharacter = null;
+
+    closeModal();
+
+    renderCharacters();
+
+    showScreen("homeScreen");
+
+    showToast("Personaggio eliminato");
+
+}
+
+
+/* -----------------------------
+   DARK MODE
+----------------------------- */
+
+function toggleDarkMode() {
+
+    document.body.classList.toggle("dark");
+
+    localStorage.setItem(
+        "rolechat_dark",
+        document.body.classList.contains("dark")
+    );
+
+}
+
+
+/* -----------------------------
+   HELPERS
+----------------------------- */
+
+function currentTime() {
+
+    const now =
+        new Date();
+
+
+    return now.toLocaleTimeString(
+        "it-IT",
+        {
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+function random(array) {
+
+    return array[
+        Math.floor(
+            Math.random() * array.length
+        )
+    ];
+
+}
+
+
+function scrollMessages() {
+
+    const messages =
+        document.getElementById("messages");
+
+
+    setTimeout(() => {
+
+        messages.scrollTop =
+            messages.scrollHeight;
+
+    }, 30);
+
+}
+
+
+function showToast(text) {
+
+    const toast =
+        document.getElementById("toast");
+
+
+    toast.textContent = text;
+
+    toast.classList.add("show");
+
+
+    setTimeout(() => {
+
+        toast.classList.remove("show");
+
+    }, 2200);
+
+}
+
+
+function escapeHTML(text) {
+
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function createAvatarPlaceholder(name) {
+
+    const letter =
+        (name || "?")
+        .charAt(0)
+        .toUpperCase();
+
+
+    return "data:image/svg+xml," +
+        encodeURIComponent(`
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="100"
+                 height="100">
+
+                <rect
+                    width="100%"
+                    height="100%"
+                    fill="#d8d8dc"
+                />
+
+                <text
+                    x="50"
+                    y="57"
+                    text-anchor="middle"
+                    font-size="45"
+                    font-family="Arial"
+                    fill="#555">
+
+                    ${letter}
+
+                </text>
+
+            </svg>
+
+        `);
+
+}
+
+
+/* -----------------------------
+   INITIALIZATION
+----------------------------- */
+
+function initialize() {
+
+    loadCharacters();
+
+    renderCharacters();
+
+
+    const dark =
+        localStorage.getItem(
+            "rolechat_dark"
+        );
+
+
+    if (dark === "true") {
+
+        document.body.classList.add("dark");
+
+    }
+
+
+    attachAvatarListener();
+
+}
+
+
+initialize();
+
+</script>
+
+</body>
+</html>
